@@ -13,7 +13,7 @@ export type Decision = "Check" | "Effect";
 
 export interface StateSlot {
   label: string;
-  value: string | number;
+  value: string | number | boolean;
   hookIndex: number;
 }
 
@@ -25,7 +25,7 @@ export interface QueueItem {
 
 export interface LocalVariable {
   name: string;
-  value: string | number;
+  value: string | number | boolean;
 }
 
 export interface TreeNode {

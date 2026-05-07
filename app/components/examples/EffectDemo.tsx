@@ -26,35 +26,39 @@ const code = `function DocumentTitle() {
   );
 }`;
 
-const steps = [
+const steps: Array<{
+  lines: string;
+  state: EffectState;
+  description: string;
+}> = [
   {
     lines: '2',
-    state: { count: 0, title: 'Default Title', phase: 'mount' as const },
+    state: { count: 0, title: 'Default Title', phase: 'mount' },
     description: 'Component mounts with initial count = 0',
   },
   {
     lines: '4-9',
-    state: { count: 0, title: 'Default Title', phase: 'mount' as const },
+    state: { count: 0, title: 'Default Title', phase: 'mount' },
     description: 'useEffect registered with dependency [count]',
   },
   {
     lines: '5',
-    state: { count: 0, title: 'Count: 0', phase: 'mount' as const },
+    state: { count: 0, title: 'Count: 0', phase: 'mount' },
     description: 'Effect runs: document.title updated to "Count: 0"',
   },
   {
     lines: '13',
-    state: { count: 1, title: 'Count: 0', phase: 'update' as const },
+    state: { count: 1, title: 'Count: 0', phase: 'update' },
     description: 'User clicks button, setCount called with new value',
   },
   {
     lines: '7-8',
-    state: { count: 1, title: 'Count: 0', phase: 'cleanup' as const },
+    state: { count: 1, title: 'Count: 0', phase: 'cleanup' },
     description: 'Cleanup function runs before next effect',
   },
   {
     lines: '5',
-    state: { count: 1, title: 'Count: 1', phase: 'update' as const },
+    state: { count: 1, title: 'Count: 1', phase: 'update' },
     description: 'Effect runs again with new count value',
   },
 ];
@@ -65,7 +69,7 @@ export default function EffectDemo() {
       code={code}
       language="tsx"
       steps={steps}
-      initialState={{ count: 0, title: 'Default Title', phase: 'mount' as const }}
+      initialState={{ count: 0, title: 'Default Title', phase: 'mount' } as EffectState}
       renderDemo={(state) => (
         <div style={{ textAlign: 'center', fontSize: '1.2rem' }}>
           <div style={{
