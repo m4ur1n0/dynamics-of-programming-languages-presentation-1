@@ -1,0 +1,693 @@
+import ContentSlide from '../ContentSlide';
+import StateQueue from '../visuals/StateQueue';
+import RenderLoop from '../visuals/RenderLoop';
+
+export function HowDoesReactWork() {
+  return (
+    <ContentSlide title="How does React work?">
+      <ul className="list-none text-3xl text-slate-300 space-y-6 w-full">
+        <li className="fragment">
+          <span className="text-cyan-400 font-mono">•</span> Whenever state changes, React re-runs component functions
+        </li>
+        <li className="fragment">
+          <span className="text-cyan-400 font-mono">•</span> Component is just a function
+          <ul className="list-none ml-8 mt-4 text-2xl text-slate-400 space-y-3">
+            <li className="fragment">○ so a single function both creates and updates views</li>
+          </ul>
+        </li>
+        <li className="fragment">
+          <span className="text-cyan-400 font-mono">•</span> A render is simply re-running the function
+          <ul className="list-none ml-8 mt-4 text-2xl text-slate-400 space-y-3">
+            <li className="fragment">○ creates new UI version</li>
+            <li className="fragment">○ React compares new UI to old one in virtual DOM</li>
+            <li className="fragment ml-8">■ finds what changed, updates those parts in the actual DOM</li>
+          </ul>
+        </li>
+      </ul>
+    </ContentSlide>
+  );
+}
+
+export function CentralWeirdness() {
+  return (
+    <ContentSlide title="The central weirdness">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> React components are repeatedly re-run
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> But state somehow persists across those runs
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Local variables reset every render
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Hook state does not reset every render
+          </li>
+          <li className="fragment">
+            <span className="text-yellow-400 font-mono">•</span> Therefore, Hook state must be stored <span className="italic">outside</span> the ordinary function call
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-6 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-3xl text-slate-300">
+            <span className="text-cyan-400 font-bold">Key idea:</span> React repeatedly reads a component function, but Hooks let the runtime remember things between reads.
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function ReactEffects() {
+  return (
+    <ContentSlide title="React Effects">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Short for <span className="italic">side effect</span>
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Code that runs as a result of rendering
+            <ul className="list-none ml-8 mt-4 text-2xl text-slate-400 space-y-3">
+              <li className="fragment">○ good for API calls, timers, logging</li>
+            </ul>
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Unlike events, which are triggered by specific user action
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-6 bg-rose-500/10 border-l-4 border-rose-400 rounded">
+          <div className="text-2xl font-bold text-rose-400 mb-5">More precise version:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• An effect is code scheduled <span className="italic">during</span> render</li>
+            <li>• It runs <span className="italic">after</span> React has committed the rendered UI</li>
+            <li>• Effects are used to synchronize React with the outside world</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function ReactHooks() {
+  return (
+    <ContentSlide title="React Hooks">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Allows you manage state and handle side effects within one component
+            <ul className="list-none ml-8 mt-4 text-2xl text-slate-400 space-y-3">
+              <li className="fragment">○ single function can create and update views</li>
+            </ul>
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Can store state to remember later
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Can run side effects after renders
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-6 bg-purple-500/10 border-l-4 border-purple-400 rounded">
+          <div className="text-2xl font-bold text-purple-400 mb-5">The two Hooks this paper focuses on:</div>
+          <div className="space-y-3 text-xl text-slate-300">
+            <div>
+              <span className="font-mono text-cyan-400 font-bold">useState</span> — persistent component state
+            </div>
+            <div>
+              <span className="font-mono text-rose-400 font-bold">useEffect</span> — post-render side effects
+            </div>
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function TheProblem() {
+  return (
+    <ContentSlide title="The Problem">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> React is a very widely used front-end library
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Many developers don't really understand how the React rendering process works
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> <span className="text-slate-400 italic">"Using useEffect can easily lead to an infinite render loop — searching StackOverflow with the query 'useEffect' 'infinite' returns more than 1600 results."</span>
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> React doesn't reveal when renders or updates actually run
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-8 bg-yellow-500/10 border-l-4 border-yellow-400 rounded">
+          <div className="text-3xl text-yellow-400 font-bold">Problem in one sentence:</div>
+          <div className="text-2xl text-slate-200 mt-3">
+            React programmers often know the <span className="italic">rules</span>, but not the <span className="italic">semantics</span> behind the rules.
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function WhatIsReactTrace() {
+  return (
+    <ContentSlide title="What is React-tRace?">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> A formal model of React Hook behavior
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Specifically: an <span className="font-mono text-purple-400">operational semantics</span> for React Hooks
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Models how React evaluates components step by step
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> Makes hidden runtime behavior explicit
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-8 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-2xl font-bold text-cyan-400 mb-5">React-tRace models:</div>
+          <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-xl text-slate-300">
+            <div>• component rendering</div>
+            <div>• re-render decisions</div>
+            <div>• state storage</div>
+            <div>• view hierarchy and reconciliation</div>
+            <div>• queued state updates</div>
+            <div>• effect scheduling</div>
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function WhyFormalize() {
+  return (
+    <ContentSlide title="Why formalize React Hooks?">
+      <ul className="list-none text-3xl text-slate-300 space-y-6 w-full">
+        <li className="fragment">
+          <span className="text-purple-400 font-mono">•</span> Informal explanations are useful, but can be incomplete
+        </li>
+        <li className="fragment">
+          <span className="text-purple-400 font-mono">•</span> React behavior depends on timing:
+          <ul className="list-none ml-8 mt-4 text-2xl text-slate-400 space-y-3">
+            <li className="fragment">○ when component bodies run</li>
+            <li className="fragment">○ when state updates are applied</li>
+            <li className="fragment">○ when effects run</li>
+            <li className="fragment">○ when React decides to render again</li>
+          </ul>
+        </li>
+        <li className="fragment">
+          <span className="text-purple-400 font-mono">•</span> A formal semantics gives precise answers to timing questions
+        </li>
+        <li className="fragment">
+          <span className="text-purple-400 font-mono">•</span> It can also support tools, interpreters, visualizers, and future analysis
+        </li>
+      </ul>
+    </ContentSlide>
+  );
+}
+
+export function MiniLanguage() {
+  return (
+    <ContentSlide title="The React-tRace mini-language">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> The paper does not model full JavaScript
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> It defines a small React-like language
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> This language keeps only the pieces needed to study Hooks
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-8 bg-slate-700/30 border border-slate-600 rounded-lg">
+          <div className="text-2xl font-bold text-slate-200 mb-5">It includes:</div>
+          <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-xl text-slate-300">
+            <div>• component definitions</div>
+            <div>• conditionals</div>
+            <div>• variables and values</div>
+            <div>• array-like views</div>
+            <div>• functions and function calls</div>
+            <div>• print statements</div>
+            <div className="font-mono text-cyan-400 font-bold">• useState</div>
+            <div className="font-mono text-rose-400 font-bold">• useEffect</div>
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function CoreSyntax() {
+  return (
+    <ContentSlide title="The core syntax of Hooks in React-tRace">
+      <div className="w-full space-y-10">
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mb-5">React-tRace writes <span className="font-mono text-cyan-400">useState</span> like:</div>
+          <div className="p-6 bg-slate-800 border-2 border-cyan-400/50 rounded-lg font-mono text-3xl text-cyan-300">
+            let (x, xset) = useState<sub className="text-sm">ℓ</sub> e in e
+          </div>
+          <ul className="mt-4 text-xl text-slate-400 space-y-1 ml-6">
+            <li className="fragment">• evaluate or retrieve state at Hook label <span className="italic">ℓ</span></li>
+            <li className="fragment">• bind <span className="font-mono">x</span> to the current state value</li>
+            <li className="fragment">• bind <span className="font-mono">xset</span> to the setter function</li>
+            <li className="fragment">• continue evaluating the component body</li>
+          </ul>
+        </div>
+
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mb-5">React-tRace writes <span className="font-mono text-rose-400">useEffect</span> like:</div>
+          <div className="p-6 bg-slate-800 border-2 border-rose-400/50 rounded-lg font-mono text-3xl text-rose-300">
+            useEffect e
+          </div>
+          <ul className="mt-4 text-xl text-slate-400 space-y-1 ml-6">
+            <li className="fragment">• collect effect expression <span className="font-mono">e</span> during render</li>
+            <li className="fragment">• run it later, after rendering</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function UseStateAndEffect() {
+  return (
+    <ContentSlide title="useState and useEffect">
+      <div className="w-full space-y-10">
+        <div className="text-3xl text-slate-300 mb-6">
+          <span className="text-rose-400 font-mono">•</span> Both have very peculiar behavior
+        </div>
+
+        <div className="fragment p-6 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-3xl font-mono text-cyan-400 font-bold mb-5">useState:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• Can't directly update variables when an event is triggered; need to use useState</li>
+            <li>• Hooks into React runtime to manage component state</li>
+            <li>• It is not immediately obvious when in the runtime the update is handled</li>
+          </ul>
+        </div>
+
+        <div className="fragment p-6 bg-rose-500/10 border-l-4 border-rose-400 rounded">
+          <div className="text-3xl font-mono text-rose-400 font-bold mb-5">useEffect:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• Hooks into rendering lifecycle of components</li>
+            <li>• Allows developers to run logic after a render</li>
+            <li>• Can lead to running excess render cycles without developer intending to</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function HowUseStateWorks() {
+  return (
+    <ContentSlide title="How useState works conceptually">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> A component function is re-run every render
+          </li>
+          <li className="fragment">
+            <span className="text-slate-500 font-mono">•</span> Local variables are recreated every render
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono font-bold">•</span> <span className="font-bold">useState stores values in React's runtime, outside the local function call</span>
+          </li>
+        </ul>
+
+        <div className="fragment mt-8 p-6 bg-purple-500/10 border border-purple-400/50 rounded">
+          <div className="text-2xl font-bold text-purple-400 mb-3">On the first render:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-2 ml-4">
+            <li>○ React evaluates the initial state</li>
+            <li>○ stores it for this Hook</li>
+          </ul>
+        </div>
+
+        <div className="fragment mt-6 p-6 bg-purple-500/10 border border-purple-400/50 rounded">
+          <div className="text-2xl font-bold text-purple-400 mb-3">On later renders:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-2 ml-4">
+            <li>○ React retrieves the stored state</li>
+            <li>○ it does not reinitialize it</li>
+          </ul>
+        </div>
+
+        <div className="fragment mt-6 p-6 bg-cyan-500/10 border border-cyan-400/50 rounded">
+          <div className="text-2xl font-bold text-cyan-400">Calling the setter queues an update</div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function StateUpdateQueues() {
+  return (
+    <ContentSlide title="State update queues">
+      <div className="w-full space-y-10">
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mb-5">When code calls:</div>
+          <div className="p-4 bg-slate-800 border border-slate-600 rounded font-mono text-cyan-300 text-xl">
+            setCount(c =&gt; c + 1)<br />
+            setCount(c =&gt; c + 1)
+          </div>
+          <div className="text-2xl text-rose-400 mt-4 font-bold">React does not immediately rewrite count.</div>
+        </div>
+
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mb-5">Instead:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3 ml-6">
+            <li>• each updater is queued</li>
+            <li>• React later processes the queue</li>
+            <li>• each updater receives the previous result</li>
+            <li>• the next render receives the final state</li>
+          </ul>
+        </div>
+
+        <div className="fragment mt-8">
+          <StateQueue />
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function WhyHookOrder() {
+  return (
+    <ContentSlide title="Why Hook order matters">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-yellow-400 font-mono">•</span> React needs a stable way to associate Hook calls with stored data
+          </li>
+          <li className="fragment">
+            <span className="text-yellow-400 font-mono">•</span> Roughly:
+            <ul className="list-none ml-8 mt-2 text-xl text-slate-400 space-y-3">
+              <li className="fragment">○ first Hook call gets first state slot</li>
+              <li className="fragment">○ second Hook call gets second state slot</li>
+              <li className="fragment">○ third Hook call gets third state slot</li>
+            </ul>
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> If Hooks run conditionally, this order can change between renders
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Then React may associate the wrong stored data with the wrong Hook
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-8 bg-red-500/10 border-2 border-red-400 rounded-lg">
+          <div className="text-3xl font-bold text-red-400">Rule:</div>
+          <div className="text-2xl text-slate-200 mt-2">
+            Hooks must be called unconditionally at the top level of a component.
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function UseEffectPostRender() {
+  return (
+    <ContentSlide title="useEffect as post-render work">
+      <div className="w-full space-y-10">
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> useEffect does not run its effect body immediately like normal code
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> During render, React records the effect
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> After the UI is rendered, React commits the effect
+          </li>
+          <li className="fragment">
+            <span className="text-rose-400 font-mono">•</span> Effects are for synchronizing with the outside world
+          </li>
+        </ul>
+
+        <div className="fragment mt-16 p-8 bg-green-500/10 border-l-4 border-green-400 rounded">
+          <div className="text-2xl font-bold text-green-400 mb-5">Good uses:</div>
+          <div className="grid grid-cols-2 gap-x-12 gap-y-4 text-xl text-slate-300">
+            <div>• API calls</div>
+            <div>• subscriptions</div>
+            <div>• timers</div>
+            <div>• logging</div>
+            <div>• document title updates</div>
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function InfiniteLoops() {
+  return (
+    <ContentSlide title="Infinite render loops from effects">
+      <div className="w-full space-y-10">
+        <div className="text-3xl text-rose-400 font-bold mb-5">A common bug:</div>
+
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">1. render component</li>
+          <li className="fragment">2. effect runs after render</li>
+          <li className="fragment">3. effect sets state</li>
+          <li className="fragment">4. state change triggers another render</li>
+          <li className="fragment">5. render schedules the effect again</li>
+          <li className="fragment">6. effect runs again</li>
+          <li className="fragment text-rose-400 font-bold">7. loop repeats ♾️</li>
+        </ul>
+
+        <div className="fragment mt-10 p-8 bg-rose-500/20 border-2 border-rose-400 rounded-lg">
+          <div className="text-2xl font-bold text-rose-400 mb-5">Pattern:</div>
+          <div className="font-mono text-3xl text-slate-200 text-center">
+            render → effect → state update → check → render → effect → ...
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function TopLevelSetters() {
+  return (
+    <ContentSlide title="Top-level setter loops">
+      <div className="w-full space-y-10">
+        <div className="text-3xl text-rose-400 font-bold mb-5">Another common bug:</div>
+
+        <ul className="list-none text-3xl text-slate-300 space-y-6">
+          <li className="fragment">• component body starts rendering</li>
+          <li className="fragment">• component directly calls a state setter while rendering</li>
+          <li className="fragment">• React immediately retries the component body</li>
+          <li className="fragment">• if the setter is called again, React retries again</li>
+          <li className="fragment text-rose-400 font-bold">• the component may never finish rendering</li>
+        </ul>
+
+        <div className="fragment mt-10 p-8 bg-yellow-500/10 border-l-4 border-yellow-400 rounded">
+          <div className="text-2xl font-bold text-yellow-400 mb-5">This is different from an effect loop:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• effect loop happens <span className="italic">after</span> render</li>
+            <li>• top-level setter loop happens <span className="italic">during</span> render</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function Flicker() {
+  return (
+    <ContentSlide title="Unnecessary re-rendering and flicker">
+      <div className="w-full space-y-10">
+        <div className="text-3xl text-slate-300 mb-5">
+          Not every render bug is an infinite loop.
+        </div>
+
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mb-5">Sometimes code causes:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3 ml-6">
+            <li>• one render with an initial or placeholder value</li>
+            <li>• an effect immediately updates state</li>
+            <li>• React renders again with the real value</li>
+          </ul>
+        </div>
+
+        <div className="fragment">
+          <div className="text-2xl text-slate-300 mt-6 mb-5">This can cause:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3 ml-6">
+            <li>• flicker</li>
+            <li>• wasted work</li>
+            <li>• confusing render traces</li>
+          </ul>
+        </div>
+
+        <div className="fragment mt-10 p-8 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-2xl font-bold text-cyan-400 mb-5">Lesson:</div>
+          <div className="text-xl text-slate-200">
+            Do not use effects to compute values that can be derived during render.
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function RuntimeModes() {
+  return (
+    <ContentSlide title="Runtime modes">
+      <div className="w-full space-y-10">
+        <div className="text-2xl text-slate-300">
+          React-tRace separates execution into different runtime moments:
+        </div>
+
+        <div className="fragment p-6 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-2xl font-mono text-cyan-400 font-bold mb-3">Rendered mode:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-2 ml-4">
+            <li>• UI has been rendered</li>
+            <li>• effects may be waiting to run</li>
+          </ul>
+        </div>
+
+        <div className="fragment p-6 bg-purple-500/10 border-l-4 border-purple-400 rounded">
+          <div className="text-2xl font-mono text-purple-400 font-bold mb-3">Check mode:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-2 ml-4">
+            <li>• React checks queued updates</li>
+            <li>• may re-render if state changed</li>
+          </ul>
+        </div>
+
+        <div className="fragment p-6 bg-yellow-500/10 border-l-4 border-yellow-400 rounded">
+          <div className="text-2xl font-mono text-yellow-400 font-bold mb-3">Event loop mode:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-2 ml-4">
+            <li>• React waits for user input</li>
+            <li>• event handlers can queue updates</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function TheRenderLoop() {
+  return (
+    <ContentSlide title="The render loop in React-tRace">
+      <div className="w-full">
+        <div className="fragment mb-8">
+          <div className="text-2xl text-slate-300 mb-5">Simplified cycle:</div>
+          <ol className="list-none text-xl text-slate-300 space-y-3 ml-6">
+            <li className="fragment">1. Initial render</li>
+            <li className="fragment">2. Commit effects</li>
+            <li className="fragment">3. Check for state updates</li>
+            <li className="fragment">4. If state changed, re-render</li>
+            <li className="fragment">5. If no update is pending, wait for events</li>
+            <li className="fragment">6. Event handlers can queue updates</li>
+            <li className="fragment">7. Checking starts again</li>
+          </ol>
+        </div>
+
+        <div className="fragment">
+          <RenderLoop />
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function WhatPaperContributes() {
+  return (
+    <ContentSlide title="What the paper contributes">
+      <div className="w-full">
+        <div className="text-2xl text-slate-300 mb-6">React-tRace provides:</div>
+
+        <ul className="list-none text-xl text-slate-300 space-y-3">
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> a formal operational semantics for React Hooks
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> a simplified React-like language focused on useState and useEffect
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> a model of state queues, effect queues, render checks, and re-rendering
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> explanations of common bugs like infinite loops and flicker
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> an interpreter and visualizer for inspecting behavior
+          </li>
+          <li className="fragment">
+            <span className="text-cyan-400 font-mono">•</span> evidence that the model matches important React behavior
+          </li>
+        </ul>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function WhyThisMatters() {
+  return (
+    <ContentSlide title="Why this matters">
+      <div className="w-full space-y-10">
+        <div className="fragment p-8 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-2xl font-bold text-cyan-400 mb-5">For React programmers:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• explains confusing Hook behavior</li>
+            <li>• gives a better mental model for avoiding bugs</li>
+            <li>• clarifies when renders, effects, and updates happen</li>
+          </ul>
+        </div>
+
+        <div className="fragment p-8 bg-purple-500/10 border-l-4 border-purple-400 rounded">
+          <div className="text-2xl font-bold text-purple-400 mb-5">For programming languages:</div>
+          <ul className="list-none text-xl text-slate-300 space-y-3">
+            <li>• shows how a real-world UI framework can be modeled formally</li>
+            <li>• bridges informal documentation and executable semantics</li>
+            <li>• creates a basis for future tools and analyses</li>
+          </ul>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}
+
+export function Conclusion() {
+  return (
+    <ContentSlide title="Conclusion">
+      <div className="w-full space-y-10">
+        <div className="fragment p-8 bg-rose-500/10 border-l-4 border-rose-400 rounded">
+          <div className="text-2xl font-bold text-rose-400 mb-3">React-tRace's main idea:</div>
+          <div className="text-xl text-slate-200">
+            React Hooks are confusing because their runtime behavior is hidden.
+          </div>
+        </div>
+
+        <div className="fragment p-8 bg-cyan-500/10 border-l-4 border-cyan-400 rounded">
+          <div className="text-2xl font-bold text-cyan-400 mb-3">The paper's solution:</div>
+          <div className="text-xl text-slate-200">
+            Make that behavior explicit with an operational semantics.
+          </div>
+        </div>
+
+        <div className="fragment p-10 bg-purple-500/20 border-2 border-purple-400 rounded-lg">
+          <div className="text-3xl font-bold text-purple-400 mb-5">Core takeaway:</div>
+          <div className="text-2xl text-slate-200">
+            React is not just "calling functions." It is running a structured render loop with persistent state, queued updates, scheduled effects, tree memory, and re-render decisions.
+          </div>
+        </div>
+      </div>
+    </ContentSlide>
+  );
+}

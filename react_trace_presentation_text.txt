@@ -1,0 +1,621 @@
+React-tRace Presentation Text Content
+Ben Auby, Theo Maurino
+
+NOTE FOR SLIDE BUILDER:
+This document contains text content for all non-demo slides. Demo slides should be included as clear placeholders only, with large empty areas reserved for live code / screenshots / visualizer recordings. Do not build the demos yet.
+
+============================================================
+SLIDE 1 — Title
+============================================================
+React-tRace
+A Semantics for Understanding React Hooks
+
+Ben Auby, Theo Maurino
+
+Optional subtitle:
+An operational semantics and visualizer for clarifying React Hooks
+
+Speaker notes:
+Today we are presenting React-tRace, a paper that tries to make React Hooks less mysterious by giving them a precise operational semantics. The main idea is that React behavior can be modeled step-by-step instead of only explained informally.
+
+============================================================
+SLIDE 2 — What is React?
+============================================================
+What is React?
+
+• JavaScript library
+• Used for building front-end applications
+• Breaks down UI to components using a virtual DOM
+  ○ tree of components
+• UI is treated as a function of state
+  ○ functions describe what the screen should look like
+  ○ is declarative
+
+ON THE RIGHT SIDE ADD A SIMPLE ANIMATED TREE COMPONENT TO SHOW HOW THE DOM WORKS
+
+Speaker notes:
+React is a front-end library for building user interfaces. Rather than manually changing the DOM every time something happens, React lets developers describe what the UI should look like for a given state. React then handles updating the actual DOM. A React application is structured as a tree of components, and each component describes one part of the interface.
+
+============================================================
+SLIDE 3 — How does React work?
+============================================================
+How does React work?
+
+• Whenever state changes, React re-runs component functions
+• Component is just a function
+  ○ so a single function both creates and updates views
+• A render is simply re-running the function
+  ○ creates new UI version
+  ○ React compares new UI to old one in virtual DOM
+    ■ finds what changed, updates those parts in the actual DOM
+
+Speaker notes:
+The key idea is that a component is just a function. React calls that function to find out what the screen should look like. When state changes, React calls the function again. That means the same function is used both to create the initial view and to update it later. React compares the new result with the old one and updates only what needs to change.
+
+This is already a little unusual compared to class-based or object-oriented UI frameworks, where different lifecycle methods may be called for initialization, updating, and cleanup. In modern React, the same function body participates in all of those phases.
+
+============================================================
+SLIDE 4 — The central weirdness
+============================================================
+The central weirdness
+
+• React components are repeatedly re-run
+• But state somehow persists across those runs
+• Local variables reset every render
+• Hook state does not reset every render
+• Therefore, Hook state must be stored outside the ordinary function call
+
+Key idea:
+React repeatedly reads a component function, but Hooks let the runtime remember things between reads.
+
+Speaker notes:
+This is the starting point for the paper. If a component function is re-run from scratch, local variables should disappear every time. But `useState` values persist. So React must have some runtime machinery outside the ordinary function call that remembers state for each component. React-tRace tries to model that machinery precisely.
+
+============================================================
+SLIDE 5 — React Effects
+============================================================
+React Effects
+
+• Short for side effect
+• Code that runs as a result of rendering
+  ○ good for API calls, timers, logging
+• Unlike events, which are triggered by specific user action
+
+More precise version:
+• An effect is code scheduled during render
+• It runs after React has committed the rendered UI
+• Effects are used to synchronize React with the outside world
+
+Speaker notes:
+Effects are for code that interacts with the outside world: network requests, timers, logging, manually changing the document title, subscriptions, and so on. The crucial point is timing. An event handler runs because a user does something. An effect runs because a render happened. React collects the effect while rendering, then runs it after the UI has been rendered.
+
+============================================================
+SLIDE 6 — React Hooks
+============================================================
+React Hooks
+
+• Allows you manage state and handle side effects within one component
+  ○ single function can create and update views
+• Can store state to remember later
+• Can run side effects after renders
+
+The two Hooks this paper focuses on:
+• useState — persistent component state
+• useEffect — post-render side effects
+
+Speaker notes:
+Hooks are APIs that let a function component interact with the React runtime. `useState` lets the component remember values across renders. `useEffect` lets the component schedule side-effecting work to happen after rendering. The paper focuses on these two because many confusing React behaviors come from their interaction.
+
+============================================================
+SLIDE 7 — The Problem
+============================================================
+The Problem
+
+• React is a very widely used front-end library
+• Many developers don’t really understand how the React rendering process works
+• “Using useEffect can easily lead to an infinite render loop — searching StackOverflow with the query ‘useEffect’ ‘infinite’ returns more than 1600 results.”
+• React doesn’t reveal when renders or updates actually run
+
+Problem in one sentence:
+React programmers often know the rules, but not the semantics behind the rules.
+
+Speaker notes:
+The paper is motivated by a gap between React practice and React understanding. Developers know advice like “don’t call Hooks conditionally” or “don’t set state in render,” but they often do not have a precise mental model of why those rules exist. React’s documentation gives useful guidance, but the paper argues that the actual render semantics are still opaque. React-tRace tries to make those hidden dynamics explicit.
+
+============================================================
+SLIDE 8 — What is React-tRace?
+============================================================
+What is React-tRace?
+
+• A formal model of React Hook behavior
+• Specifically: an operational semantics for React Hooks
+• Models how React evaluates components step by step
+• Makes hidden runtime behavior explicit
+
+React-tRace models:
+• component rendering
+• state storage
+• queued state updates
+• effect scheduling
+• re-render decisions
+• view hierarchy and reconciliation
+
+Speaker notes:
+React-tRace is the paper’s main contribution. It is not another React tutorial. It is a formal semantics: a precise model of how React Hooks behave. Operational semantics means the model describes program behavior as a sequence of steps. In this case, the steps include rendering components, storing state, queuing updates, running effects, checking whether another render is needed, and reconciling the new UI with the old one.
+
+============================================================
+SLIDE 9 — Why formalize React Hooks?
+============================================================
+Why formalize React Hooks?
+
+• Informal explanations are useful, but can be incomplete
+• React behavior depends on timing:
+  ○ when component bodies run
+  ○ when state updates are applied
+  ○ when effects run
+  ○ when React decides to render again
+• A formal semantics gives precise answers to timing questions
+• It can also support tools, interpreters, visualizers, and future analysis
+
+Speaker notes:
+The reason this belongs in a programming languages class is that React Hooks are not just a library convenience. They define a little runtime discipline for rendering, state, and effects. The paper asks: can we describe that discipline mathematically? Once we have a semantics, we can explain bugs more rigorously and potentially build tools that reason from the semantics instead of just checking syntax or observing runtime behavior.
+
+============================================================
+SLIDE 10 — The React-tRace mini-language
+============================================================
+The React-tRace mini-language
+
+• The paper does not model full JavaScript
+• It defines a small React-like language
+• This language keeps only the pieces needed to study Hooks
+
+It includes:
+• component definitions
+• variables and values
+• functions and function calls
+• conditionals
+• array-like views
+• print statements for observing execution
+• useState
+• useEffect
+
+Speaker notes:
+A major PL move in the paper is simplification. JavaScript is too large and complicated to model when the goal is specifically to understand Hooks. So the authors define a smaller language that behaves like the part of React they care about. This lets them ignore unrelated JavaScript details and focus directly on rendering, state, and effects.
+
+============================================================
+SLIDE 11 — The core syntax of Hooks in React-tRace
+============================================================
+The core syntax of Hooks in React-tRace
+
+React-tRace writes useState like:
+
+let (x, xset) = useStateℓ e in e
+
+Meaning:
+• evaluate or retrieve state at Hook label ℓ
+• bind x to the current state value
+• bind xset to the setter function
+• continue evaluating the component body
+
+React-tRace writes useEffect like:
+
+useEffect e
+
+Meaning:
+• collect effect expression e during render
+• run it later, after rendering
+
+Speaker notes:
+The syntax looks mathy, but it maps closely to normal React. `let (x, xset) = useStateℓ e in e` is basically `const [x, setX] = useState(e)`, except the Hook has an explicit label ℓ. That label represents the Hook’s stable position. `useEffect e` means the effect expression is collected during rendering and executed after render.
+
+============================================================
+SLIDE 12 — useState and useEffect
+============================================================
+useState and useEffect
+
+• Both have very peculiar behavior
+
+useState:
+• Can’t directly update variables when an event is triggered; need to use useState
+• Hooks into React runtime to manage component state
+• It is not immediately obvious when in the runtime the update is handled
+
+useEffect:
+• Hooks into rendering lifecycle of components
+• Allows developers to run logic after a render
+• Can lead to running excess render cycles without developer intending to
+
+Speaker notes:
+This is the heart of the paper. `useState` and `useEffect` are powerful because they let one component function manage both persistent state and side effects. But this also creates confusing behavior. State setters do not behave like assignments to local variables, and effects run later than the code around them suggests. When setters and effects interact, small mistakes can create extra renders, flicker, or infinite loops.
+
+============================================================
+SLIDE 13 — How useState works conceptually
+============================================================
+How useState works conceptually
+
+• A component function is re-run every render
+• Local variables are recreated every render
+• useState stores values in React’s runtime, outside the local function call
+• On the first render:
+  ○ React evaluates the initial state
+  ○ stores it for this Hook
+• On later renders:
+  ○ React retrieves the stored state
+  ○ it does not reinitialize it
+• Calling the setter queues an update
+
+Speaker notes:
+The simplest way to understand `useState` is that React keeps a state store outside the component function. The component function gets a snapshot of that state for the current render. Calling a setter does not mutate the local variable from the current render. It queues an update that React will process during a future render.
+
+============================================================
+SLIDE 14 — State update queues
+============================================================
+State update queues
+
+When code calls:
+
+setCount(c => c + 1)
+setCount(c => c + 1)
+
+React does not immediately rewrite count.
+
+Instead:
+• each updater is queued
+• React later processes the queue
+• each updater receives the previous result
+• the next render receives the final state
+
+Example:
+0 → 1 → 2
+
+Speaker notes:
+This explains why the updater-function form of `setState` is important. If multiple updates happen together, React can queue them and apply them in order. The component does not directly control when the queue is processed. React-tRace formalizes this with a state store and a state update queue.
+
+============================================================
+SLIDE 15 — Why Hook order matters
+============================================================
+Why Hook order matters
+
+• React needs a stable way to associate Hook calls with stored data
+• Roughly:
+  ○ first Hook call gets first state slot
+  ○ second Hook call gets second state slot
+  ○ third Hook call gets third state slot
+• If Hooks run conditionally, this order can change between renders
+• Then React may associate the wrong stored data with the wrong Hook
+
+Rule:
+Hooks must be called unconditionally at the top level of a component.
+
+Speaker notes:
+This is why the Rules of Hooks exist. React does not track Hook state by the variable name you choose. It tracks Hook state by the stable position of the Hook call during rendering. If a Hook appears only inside an `if` statement, then the order of Hook calls can change across renders. React-tRace avoids this by enforcing Hook usage syntactically.
+
+============================================================
+SLIDE 16 — useEffect as post-render work
+============================================================
+useEffect as post-render work
+
+• useEffect does not run its effect body immediately like normal code
+• During render, React records the effect
+• After the UI is rendered, React commits the effect
+• Effects are for synchronizing with the outside world
+
+Good uses:
+• API calls
+• timers
+• subscriptions
+• logging
+• document title updates
+
+Speaker notes:
+`useEffect` is about timing. The effect is not just another expression that runs immediately while the component body is being evaluated. It is scheduled during render and then executed after the render is committed. That delayed timing is exactly why effects are useful, but it is also why effects can create confusing render behavior.
+
+============================================================
+SLIDE 17 — Infinite render loops from effects
+============================================================
+Infinite render loops from effects
+
+A common bug:
+• render component
+• effect runs after render
+• effect sets state
+• state change triggers another render
+• render schedules the effect again
+• effect runs again
+• loop repeats
+
+Pattern:
+render → effect → state update → check → render → effect → ...
+
+Speaker notes:
+This is one of the paper’s main motivating examples. If an effect always sets state to a new value, then every render causes an effect, and every effect causes another render. React-tRace models this with decisions and queues: the effect queues a state update, React enters a checking phase, sees the update, re-renders, and then commits effects again.
+
+============================================================
+SLIDE 18 — Top-level setter loops
+============================================================
+Top-level setter loops
+
+Another common bug:
+• component body starts rendering
+• component directly calls a state setter while rendering
+• React immediately retries the component body
+• if the setter is called again, React retries again
+• the component may never finish rendering
+
+This is different from an effect loop:
+• effect loop happens after render
+• top-level setter loop happens during render
+
+Speaker notes:
+This distinction is important. An effect loop at least goes through a render/effect/check cycle. A top-level setter call happens while the component body is being evaluated, so React treats it as a reason to retry the render immediately. If the setter call is unconditional, the component can never settle into a stable rendered result.
+
+============================================================
+SLIDE 19 — Unnecessary re-rendering and flicker
+============================================================
+Unnecessary re-rendering and flicker
+
+Not every render bug is an infinite loop.
+
+Sometimes code causes:
+• one render with an initial or placeholder value
+• an effect immediately updates state
+• React renders again with the real value
+
+This can cause:
+• flicker
+• wasted work
+• confusing render traces
+
+Lesson:
+Do not use effects to compute values that can be derived during render.
+
+Speaker notes:
+The paper also discusses unnecessary re-rendering. A component might render with one value, then immediately run an effect that replaces it with another value. If that value could have been computed during render from existing props or state, the effect is unnecessary. React-tRace helps explain this as an extra render cycle created by post-render state update timing.
+
+============================================================
+SLIDE 20 — Inter-component updates
+============================================================
+Inter-component updates
+
+Effects and event handlers can update another component’s state.
+
+Example pattern:
+• parent owns state
+• parent passes setter to child
+• child effect calls parent’s setter
+• parent is marked for checking
+• parent may re-render and change the child tree
+
+Why this matters:
+State updates are not always local to the component where the code runs.
+
+Speaker notes:
+The paper includes examples where a child component updates a parent during an effect. This matters because React is rendering a tree, not just isolated functions. A state update from one part of the tree can force another part of the tree to be checked and possibly re-rendered. React-tRace represents this using paths in tree memory so setter functions know which view’s state they update.
+
+============================================================
+SLIDE 21 — Tree memory and view hierarchy
+============================================================
+Tree memory and view hierarchy
+
+React-tRace models the UI as a tree of views.
+
+Each view stores information like:
+• component specification
+• current decisions
+• state store
+• effect queue
+• child tree
+
+The model uses paths to identify views in the tree.
+
+Why this matters:
+React needs to know which component instance owns which state and effects.
+
+Speaker notes:
+This is where the paper gets more formal. React-tRace uses tree memory to represent the rendered component hierarchy. Each component view has its own state store and effect queue. A path identifies where that view lives in the tree. This lets the model explain how a setter from one component can update the correct component’s state, even later during an effect or event handler.
+
+============================================================
+SLIDE 22 — Decisions: Check and Effect
+============================================================
+Decisions: Check and Effect
+
+React-tRace uses decisions to track what must happen next.
+
+Check:
+• a state update has been queued
+• React needs to check whether a re-render is needed
+
+Effect:
+• this view’s effects should run after rendering
+
+Why decisions are useful:
+They make React’s hidden scheduling choices explicit.
+
+Speaker notes:
+The paper introduces decisions as a clean way to model runtime scheduling. If a setter queues a state update, the view gets a Check decision. If a render produces changed state and effects need to run, the view gets an Effect decision. These decisions drive the render loop: should React check for updates, render again, commit effects, or wait for an event?
+
+============================================================
+SLIDE 23 — Runtime modes
+============================================================
+Runtime modes
+
+React-tRace separates execution into different runtime moments:
+
+Rendered mode:
+• UI has been rendered
+• effects may be waiting to run
+
+Check mode:
+• React checks queued updates
+• may re-render if state changed
+
+Event loop mode:
+• React waits for user input
+• event handlers can queue updates
+
+Speaker notes:
+This is one of the clearest ways to understand the operational semantics. Code in a component body, code in an effect, and code in an event handler do not all happen in the same mode. React-tRace makes those modes explicit so that confusing log orders and render cycles can be explained step by step.
+
+============================================================
+SLIDE 24 — The render loop in React-tRace
+============================================================
+The render loop in React-tRace
+
+Simplified cycle:
+
+1. Initial render
+2. Commit effects
+3. Check for state updates
+4. If state changed, re-render
+5. If no update is pending, wait for events
+6. Event handlers can queue updates
+7. Checking starts again
+
+Mental model:
+render → effects → check → event → check → render → ...
+
+Speaker notes:
+The paper’s operational semantics formalizes this loop. Initial rendering creates the tree. Effects are committed after rendering. State updates are checked. If updates changed state, React renders again; otherwise it waits for events. Events can queue more updates, restarting the check process. This is the hidden dynamic the paper is trying to clarify.
+
+============================================================
+SLIDE 25 — Reconciliation
+============================================================
+Reconciliation
+
+After state changes, React does not rebuild everything from scratch.
+
+Instead:
+• component functions produce a new UI description
+• React compares the new description with the old tree
+• matching components can keep their state
+• changed parts are updated or re-initialized
+
+In React-tRace:
+• reconciliation updates the tree while preserving valid existing views when possible
+
+Speaker notes:
+Reconciliation is how React updates efficiently. The paper includes reconciliation because Hook state is tied to component identity in the tree. If a component remains the same kind of component in the same place, React can preserve its state. If the component changes, React may initialize a new view. This is another reason tree structure matters in the semantics.
+
+============================================================
+SLIDE 26 — The visualizer
+============================================================
+The visualizer
+
+React-tRace is not only a paper model.
+
+The authors also built:
+• a definitional interpreter
+• an interactive visualizer
+
+The visualizer helps users inspect:
+• view hierarchy
+• tree memory
+• render steps
+• state queues
+• effect behavior
+• re-rendering bugs
+
+Speaker notes:
+A major payoff of the formal model is tooling. The authors implement the semantics as an interpreter and build a visualizer so developers can replay and inspect render behavior. This is important because the paper’s goal is not just to prove something abstract; it is also to make React’s runtime behavior more understandable.
+
+============================================================
+SLIDE 27 — Conformance with React
+============================================================
+Conformance with React
+
+The paper argues React-tRace matches real React behavior in two ways:
+
+1. Theoretical conformance
+   • proves key properties from React documentation
+
+2. Empirical conformance
+   • compares React-tRace against React runtime behavior
+   • uses a test suite covering many render scenarios
+
+Takeaway:
+React-tRace is simplified, but it is meant to capture the essence of real Hooks.
+
+Speaker notes:
+Because React itself does not come with a formal semantics, the authors validate their model in two ways. First, they prove that React-tRace satisfies important properties described by React documentation. Second, they run tests comparing the React-tRace interpreter to real React. The point is not that the model includes every React implementation detail, but that it captures the key behavior needed to reason about Hooks.
+
+============================================================
+SLIDE 28 — What the paper contributes
+============================================================
+What the paper contributes
+
+React-tRace provides:
+
+• a formal operational semantics for React Hooks
+• a simplified React-like language focused on useState and useEffect
+• a model of state queues, effect queues, render checks, and re-rendering
+• explanations of common bugs like infinite loops and flicker
+• an interpreter and visualizer for inspecting behavior
+• evidence that the model matches important React behavior
+
+Speaker notes:
+This slide summarizes the paper’s contribution. The paper turns React’s informal mental model into a precise step-by-step semantics. It is especially focused on the dynamics of rendering: when component bodies run, when state updates apply, when effects run, and why certain code causes re-renders or loops.
+
+============================================================
+SLIDE 29 — Why this matters
+============================================================
+Why this matters
+
+For React programmers:
+• explains confusing Hook behavior
+• gives a better mental model for avoiding bugs
+• clarifies when renders, effects, and updates happen
+
+For programming languages:
+• shows how a real-world UI framework can be modeled formally
+• bridges informal documentation and executable semantics
+• creates a basis for future tools and analyses
+
+Speaker notes:
+This paper is interesting because it connects practical software engineering with programming language semantics. On the React side, it helps developers understand bugs they actually encounter. On the PL side, it shows how formal semantics can model a widely used real-world framework and support tools like visualizers or future static analyzers.
+
+============================================================
+SLIDE 30 — Conclusion
+============================================================
+Conclusion
+
+React-tRace’s main idea:
+React Hooks are confusing because their runtime behavior is hidden.
+
+The paper’s solution:
+Make that behavior explicit with an operational semantics.
+
+Core takeaway:
+React is not just “calling functions.” It is running a structured render loop with persistent state, queued updates, scheduled effects, tree memory, and re-render decisions.
+
+Speaker notes:
+The main takeaway is that React components look like ordinary functions, but Hook behavior depends on runtime machinery outside the function. React-tRace makes that machinery explicit. It gives precise language for understanding what React is doing under the hood and why common Hook bugs happen.
+
+============================================================
+DEMO PLACEHOLDER SLIDES TO INCLUDE
+============================================================
+These slides should be included visually, but do not build the demos yet.
+
+DEMO A — Basic React
+Purpose:
+Show a simple component re-rendering when state changes. Emphasize that the component function is called again.
+
+DEMO B — React Hooks
+Purpose:
+Show useState persistence and useEffect post-render behavior.
+
+DEMO C — Mini React Runtime Simulator
+Purpose:
+Animated explanation of state store, hook index/labels, queued updates, and re-rendering.
+
+DEMO D — Bug demo
+Purpose:
+Show either infinite effect loop, top-level setter loop, or flicker.
+
+DEMO E — Fixed version
+Purpose:
+Show how understanding the semantics leads to better code.
+
+DEMO F — React-tRace visualizer
+Purpose:
+Run a small bug example in the actual visualizer or show a recording/screenshot, leaving room for a live walkthrough.
+

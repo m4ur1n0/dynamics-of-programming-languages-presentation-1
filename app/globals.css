@@ -10,3 +10,93 @@ html, body {
   height: 100%;
   overflow: hidden;
 }
+
+/* Reveal.js Slide Typography & Spacing */
+.reveal h1, .reveal h2, .reveal h3 {
+  margin-bottom: 1.5rem;
+}
+
+.reveal h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+}
+
+.reveal h2 {
+  font-size: 2rem;
+  line-height: 1.3;
+}
+
+.reveal h3 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.reveal p {
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.reveal ul, .reveal ol {
+  margin-bottom: 1.5rem;
+}
+
+.reveal li {
+  margin-bottom: 0.75rem;
+  line-height: 1.45;
+}
+
+.reveal li li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Slide content container */
+.reveal .slides section {
+  padding: 2rem;
+}
+
+.reveal .slides section > * {
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Code blocks */
+.reveal pre {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 0.5rem;
+}
+
+.reveal code {
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Animations for Opening Slide */
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -30px) scale(1.1); }
+  50% { transform: translate(-20px, 20px) scale(0.9); }
+  75% { transform: translate(40px, 10px) scale(1.05); }
+}
+
+@keyframes traceLine {
+  0% { opacity: 0; transform: translateX(-100%); }
+  50% { opacity: 0.6; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(100%); }
+}
+
+@keyframes shimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+}
+
+.animate-float { animation: float 20s ease-in-out infinite; }
+.animate-float-reverse { animation: float 15s ease-in-out infinite reverse; }
+.animate-float-delayed { animation: float 18s ease-in-out infinite; animation-delay: 2s; }
+.animate-trace-1 { animation: traceLine 3s ease-in-out infinite; }
+.animate-trace-2 { animation: traceLine 3s ease-in-out infinite; animation-delay: 1s; }
+.animate-trace-3 { animation: traceLine 3s ease-in-out infinite; animation-delay: 2s; }
+.animate-shimmer { animation: shimmer 3s ease-in-out infinite; }
+.animate-shimmer-delayed { animation: shimmer 3s ease-in-out infinite; animation-delay: 0.5s; }

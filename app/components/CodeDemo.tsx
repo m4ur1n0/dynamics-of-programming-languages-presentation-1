@@ -16,6 +16,11 @@ interface CodeDemoProps<T> {
   initialState: T;
 }
 
+// Type for Reveal.js fragment events
+interface RevealFragmentEvent extends CustomEvent {
+  fragment: HTMLElement;
+}
+
 export default function CodeDemo<T>({
   code,
   language = 'typescript',
@@ -28,7 +33,9 @@ export default function CodeDemo<T>({
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const handleFragmentShown = (event: any) => {
+    const handleFragmentShown = (event: Event) => {
+      // Type guard: check if event is a RevealFragmentEvent
+      if (!('fragment' in event) || !(event.fragment instanceof HTMLElement)) return;
       if (!sectionRef.current?.contains(event.fragment)) return;
 
       const stepIndex = parseInt(event.fragment.dataset.stepIndex || '0');
@@ -38,7 +45,9 @@ export default function CodeDemo<T>({
       }
     };
 
-    const handleFragmentHidden = (event: any) => {
+    const handleFragmentHidden = (event: Event) => {
+      // Type guard: check if event is a RevealFragmentEvent
+      if (!('fragment' in event) || !(event.fragment instanceof HTMLElement)) return;
       if (!sectionRef.current?.contains(event.fragment)) return;
 
       const stepIndex = parseInt(event.fragment.dataset.stepIndex || '0');
@@ -67,7 +76,7 @@ export default function CodeDemo<T>({
   return (
     <section ref={sectionRef}>
       <div style={{ display: 'flex', gap: '2rem', height: '600px', alignItems: 'stretch' }}>
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div style={{ flex: 1, overflow: 'auto', width: "70%"}}>
           <pre style={{ margin: 0, height: '100%' }}>
             <code
               className={`language-${language}`}
@@ -79,7 +88,7 @@ export default function CodeDemo<T>({
           </pre>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '1rem', width: '30%'}}>
           <div style={{
             flex: 1,
             border: '2px solid #444',

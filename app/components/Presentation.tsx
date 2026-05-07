@@ -6,8 +6,14 @@ interface PresentationProps {
   children: React.ReactNode;
 }
 
+// Type for Reveal.js API based on methods we use
+interface RevealApi {
+  initialize: () => Promise<void>;
+  destroy: () => void;
+}
+
 export default function Presentation({ children }: PresentationProps) {
-  const deckRef = useRef<any>(null);
+  const deckRef = useRef<RevealApi | null>(null);
   const revealDivRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
