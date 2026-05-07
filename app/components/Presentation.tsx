@@ -8,7 +8,7 @@ interface PresentationProps {
 
 // Type for Reveal.js API based on methods we use
 interface RevealApi {
-  initialize: () => Promise<void>;
+  initialize: () => Promise<RevealApi>;
   destroy: () => void;
 }
 

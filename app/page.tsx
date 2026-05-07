@@ -1,7 +1,6 @@
 import Presentation from './components/Presentation';
 import TitleSlide from './components/TitleSlide';
 import OpeningSlide from './components/OpeningSlide';
-import DemoPlaceholder from './components/DemoPlaceholder';
 import WhatIsReact from './components/slides/WhatIsReact';
 import { DemoSlide, placeholderDemo, miniRuntimeDemo, fixedLoopDemo, hookSlotScramblerDemo, effectLoopDemo, flickerDerivedStateDemo, childDeletesItselfDemo } from './components/demos';
 import {
